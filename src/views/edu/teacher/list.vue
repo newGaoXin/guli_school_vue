@@ -68,6 +68,9 @@
       </el-table-column>
       <el-table-column label="操作" align="center">
         <template slot-scope="scope">
+          <el-button type="primary" @click="updateById(scope.row)"
+            >修改</el-button
+          >
           <el-button type="danger" @click="deleteById(scope.row.id)"
             >删除</el-button
           >
@@ -90,7 +93,7 @@
 
 <script>
 import { teacherList, deleteTeacherById } from "@/api/edu/teacher";
-import edit from "./components/add";
+import edit from "./components/edit";
 
 export default {
   name: "teacher",
@@ -121,6 +124,9 @@ export default {
         }
       );
       //   this.loading = true;
+    },
+    updateById(row) {
+      this.$refs["edit"].show(row);
     },
     deleteById(id) {
       this.$confirm("此操作将永久删除讲师, 是否继续?", "提示", {
