@@ -8,6 +8,15 @@ export function teacherList(current, limit, teacherQuery) {
     })
 }
 
+export function teacherAll() {
+    return request({
+        url: '/eduservice/teacher/findAll',
+        method: 'get',
+        // data: 
+    })
+}
+
+
 export function deleteTeacherById(id) {
     return request({
         url: `/eduservice/teacher/delete/${id}`,
