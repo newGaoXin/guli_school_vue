@@ -17,7 +17,12 @@
       <el-step title="提交审核" />
     </el-steps>
     <template v-if="active == 1">
-      <el-form label-width="120px">
+      <el-form
+        :model="courseBase"
+        ref="courseBaseForm"
+        :rules="courseBaseRules"
+        label-width="120px"
+      >
         <el-form-item label="课程标题">
           <el-input
             v-model="courseBase.title"
@@ -75,16 +80,24 @@
           />
         </el-form-item>
         <!-- 课程简介 TODO -->
+        <!-- 课程简介-->
+        <el-form-item label="课程简介">
+          <tinymce :height="300" v-model="courseBase.description" />
+        </el-form-item>
         <!-- 课程封面 TODO -->
         <el-form-item label="课程封面">
           <el-upload
             :show-file-list="false"
             :on-success="handleAvatarSuccess"
             :before-upload="beforeAvatarUpload"
-            :action="BASE_API + '/admin/oss/file/upload?host=cover'"
+            :action="BASE_API + '/oss/file/uploadFile'"
             class="avatar-uploader"
           >
-            <img v-if="courseBase.cover" :src="courseBase.cover" />
+            <img
+              v-if="courseBase.cover"
+              :src="courseBase.cover"
+              class="avatar"
+            />
             <i v-else class="el-icon-plus avatar-uploader-icon"></i>
           </el-upload>
         </el-form-item>
@@ -101,9 +114,31 @@
     </template>
 
     <template v-if="active == 2">
-      <el-form label-width="120px">
-        <el-form-item> </el-form-item>
-      </el-form>
+      <!-- 章节 -->
+      <ul class="chanpterList">
+        <li v-for="chapter in chapterNestedList" :key="chapter.id">
+          <p>
+            {{ chapter.title }}
+            <span class="acts">
+              <el-button type="text">添加课时</el-button>
+              <el-button style="" type="text">编辑</el-button>
+              <el-button type="text">删除</el-button>
+            </span>
+          </p>
+          <!-- 视频 -->
+          <ul class="chanpterList videoList">
+            <li v-for="video in chapter.children" :key="video.id">
+              <p>
+                {{ video.title }}
+                <span class="acts">
+                  <el-button type="text">编辑</el-button>
+                  <el-button type="text">删除</el-button>
+                </span>
+              </p>
+            </li>
+          </ul>
+        </li>
+      </ul>
     </template>
 
     <template v-else>
@@ -114,7 +149,7 @@
 
     <span slot="footer" class="dialog-footer">
       <el-button v-if="active > 1" @click="previous">返回修改</el-button>
-      <el-button v-else @click="dialogVisible == false"></el-button>
+      <!-- <el-button v-else @click="dialogVisible == false"></el-button> -->
       <el-button
         :disabled="saveBtnDisabled"
         type="primary"
@@ -131,17 +166,47 @@ import { addCourse } from "@/api/edu/course";
 import { teacherAll } from "@/api/edu/teacher";
 import { getList } from "@/api/edu/subject";
 
+import Tinymce from "@/components/Tinymce";
+
 export default {
+  components: { Tinymce },
   data() {
     return {
       courseBase: {
         title: "",
+        subjectParentId: "",
         subjectId: "",
         teacherId: "",
         lessonNum: 0,
         description: "",
         cover: "",
         price: 0
+      },
+      courseBaseRules: {
+        title: [
+          { required: true, message: "请选择活动区域", trigger: "change" }
+        ],
+        subjectParentId: [
+          { required: true, message: "请选择活动区域", trigger: "change" }
+        ],
+        subjectId: [
+          { required: true, message: "请选择活动区域", trigger: "change" }
+        ],
+        teacherId: [
+          { required: true, message: "请选择活动区域", trigger: "change" }
+        ],
+        lessonNum: [
+          { required: true, message: "请选择活动区域", trigger: "change" }
+        ],
+        description: [
+          { required: true, message: "请选择活动区域", trigger: "change" }
+        ],
+        cover: [
+          { required: true, message: "请选择活动区域", trigger: "change" }
+        ],
+        price: [
+          { required: true, message: "请选择活动区域", trigger: "change" }
+        ]
       },
       teacherList: [],
       subjectNestedList: [],
@@ -196,8 +261,7 @@ export default {
     save(active) {
       switch (active) {
         case 1: {
-          this.active++;
-          saveBaseMag();
+          this.saveBaseMag();
           break;
         }
         case 2: {
@@ -212,11 +276,35 @@ export default {
     previous() {
       this.active--;
     },
-    saveBaseMag(active) {},
+    saveBaseMag(active) {
+      this.$refs["courseBaseForm"].validate(valid => {
+        if (valid) {
+          console.log(this.courseBase);
+          this.active++;
+          // this.saveBtnDisabled = true;
+          // const req =
+          //   this.isAdd == true
+          //     ? addTeacher(this.teacher)
+          //     : updateTeacher(this.teacher);s
+          // req.then(res => {
+          //   let text;
+          //   this.isAdd == true ? (text = "添加") : (text = "修改");
+          //   this.$message({
+          //     type: "success",
+          //     message: text + "成功!"
+          //   });
+          //   this.handleClose();
+          //   this.$emit("getList");
+          // });
+        } else {
+          console.log("error submit!!");
+          return false;
+        }
+      });
+    },
     handleClose() {
       //   this.$set(this.dialogVisible, false);
-      this.dialogVisible == false;
-      console.log(this.dialogVisible);
+      this.dialogVisible = false;
     }
   }
 };
@@ -245,5 +333,10 @@ export default {
   width: 178px;
   height: 178px;
   display: block;
+}
+</style>
+<style scoped>
+.tinymce-container {
+  line-height: 29px;
 }
 </style>
